@@ -1,6 +1,80 @@
 import streamlit as st
+import os
+from PIL import Image
+from streamlit_cropper import st_cropper
 
-st.title("🎈 My new app")
-st.write(
-    "Let's start building! For help and inspiration, head over to [docs.streamlit.io](https://docs.streamlit.io/)."
-)
+# Constants for target image size (after cropping)
+TARGET_WIDTH = 2800
+TARGET_HEIGHT = 2000
+
+# Step 1: Image Selection
+st.title("Seal ID Photo Selector & Cropper")
+
+# Initialize session state variables if they don't exist
+if "selected_images" not in st.session_state:
+    st.session_state.selected_images = []
+if "cropping_stage" not in st.session_state:
+    st.session_state.cropping_stage = False  # Controls if we move to the crop stage
+
+# **Upload Multiple Images**
+uploaded_files = st.file_uploader("Upload multiple photos", type=["jpg", "jpeg", "png"], accept_multiple_files=True)
+
+# **Image Selection Stage**
+if uploaded_files and not st.session_state.cropping_stage:
+    st.subheader("Select the Best 1-3 Photos")
+    
+    selected_images = []
+    cols = st.columns(3)  # Arrange images in a grid
+
+    for i, uploaded_file in enumerate(uploaded_files):
+        image = Image.open(uploaded_file)
+        with cols[i % 3]:  # Distribute images in columns
+            st.image(image, caption=uploaded_file.name, use_container_width=True)  # Replace use_column_width
+            if st.checkbox(f"Select {uploaded_file.name}", key=uploaded_file.name):
+                selected_images.append(uploaded_file)
+
+    # **Confirm Selection**
+    if st.button("OK - Proceed to Cropping"):
+        if len(selected_images) == 0 or len(selected_images) > 3:
+            st.warning("Please select 1-3 images.")
+        else:
+            st.session_state.selected_images = selected_images
+            st.session_state.cropping_stage = True
+            # Instead of rerunning, we clear cache or manually reload the interface
+            st.session_state.cropping_stage = True
+            st.experimental_set_query_params()  # Clear session state and reload interface
+
+# **Step 2: Cropping Interface**
+if st.session_state.cropping_stage:
+    st.subheader("Crop Selected Images")
+    cropped_images = {}
+
+    for uploaded_file in st.session_state.selected_images:
+        image = Image.open(uploaded_file)
+
+        st.write(f"**Crop {uploaded_file.name}**")
+        # Crop the image with default behavior (no box_algorithm specified)
+        cropped_image = st_cropper(image, aspect_ratio=None)  # Removed box_algorithm
+
+        cropped_images[uploaded_file.name] = cropped_image
+
+    # **Step 3: Save & Download**
+    if st.button("OK - Save Cropped Images"):
+        output_folder = "cropped_images"
+        os.makedirs(output_folder, exist_ok=True)
+
+        for filename, cropped_img in cropped_images.items():
+            # Resize to target dimensions (after cropping)
+            cropped_resized_img = cropped_img.resize((TARGET_WIDTH, TARGET_HEIGHT))
+            
+            save_path = os.path.join(output_folder, f"{os.path.splitext(filename)[0]}_cropped.jpg")
+            cropped_resized_img.save(save_path)
+
+            st.success(f"Saved: `{save_path}`")
+
+            with open(save_path, "rb") as file:
+                st.download_button(label=f"Download {filename}_cropped", data=file, file_name=os.path.basename(save_path))
+
+        # Reset the app for a new selection
+        st.session_state.selected_images = []
+        st.session_state.cropping_stage = False
