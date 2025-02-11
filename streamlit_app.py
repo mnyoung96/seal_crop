@@ -2,6 +2,7 @@ import streamlit as st
 import os
 from PIL import Image
 from streamlit_cropper import st_cropper
+import zipfile
 
 # Step 1: Image Selection
 st.title("Seal ID Photo Selector & Cropper")
@@ -65,20 +66,18 @@ if st.session_state.cropping_stage:
             st.success(f"Saved: `{save_path}`")
 
         # Provide a button to download all images as a zip file
-        if st.button("Download All Cropped Images"):
-            import zipfile
-            zip_path = os.path.join(output_folder, "cropped_images.zip")
-            with zipfile.ZipFile(zip_path, 'w') as zipf:
-                for filename in os.listdir(output_folder):
-                    if filename.endswith("_cropped.jpg"):
-                        zipf.write(os.path.join(output_folder, filename), filename)
-            
-            with open(zip_path, "rb") as file:
-                st.download_button(label="Download All Cropped Images", data=file, file_name="cropped_images.zip")
+        zip_path = os.path.join(output_folder, "cropped_images.zip")
+        with zipfile.ZipFile(zip_path, 'w') as zipf:
+            for filename in os.listdir(output_folder):
+                if filename.endswith("_cropped.jpg"):
+                    zipf.write(os.path.join(output_folder, filename), filename)
+        
+        with open(zip_path, "rb") as file:
+            st.download_button(label="Download All Cropped Images", data=file, file_name="cropped_images.zip")
 
     # Button to return to the beginning
     if st.button("Start Over"):
         st.session_state.selected_images = []
         st.session_state.cropping_stage = False
-        st.session_state.cropped_images = {}
+        st.session_state.cropped_images = []
         st.experimental_rerun()
