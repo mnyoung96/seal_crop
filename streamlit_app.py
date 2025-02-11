@@ -37,7 +37,6 @@ if uploaded_files and not st.session_state.cropping_stage:
         else:
             st.session_state.selected_images = selected_images
             st.session_state.cropping_stage = True
-            st.experimental_rerun()
 
 # Step 2: Cropping Interface
 if st.session_state.cropping_stage:
@@ -74,10 +73,3 @@ if st.session_state.cropping_stage:
         
         with open(zip_path, "rb") as file:
             st.download_button(label="Download All Cropped Images", data=file, file_name="cropped_images.zip")
-
-    # Button to return to the beginning
-    if st.button("Start Over"):
-        st.session_state.selected_images = []
-        st.session_state.cropping_stage = False
-        st.session_state.cropped_images = {}
-        st.experimental_rerun()
