@@ -106,8 +106,9 @@ if st.session_state.cropping_stage:
     # Provide individual download buttons for each cropped image
     for filename, cropped_img in st.session_state.cropped_images.items():
         save_path = os.path.join("cropped_images", f"{os.path.splitext(filename)[0]}_cropped.jpg")
-        with open(save_path, "rb") as file:
-            st.download_button(label=f"Download {filename}_cropped", data=file, file_name=os.path.basename(save_path))
+        if os.path.exists(save_path):
+            with open(save_path, "rb") as file:
+                st.download_button(label=f"Download {filename}_cropped", data=file, file_name=os.path.basename(save_path))
 
     # Button to return to the beginning
     if st.button("Start Over"):
