@@ -79,5 +79,5 @@ if st.session_state.cropping_stage:
     if st.button("Start Over"):
         st.session_state.selected_images = []
         st.session_state.cropping_stage = False
-        st.session_state.cropped_images = []
+        st.session_state.cropped_images = {}
         st.experimental_rerun()
