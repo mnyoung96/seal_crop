@@ -10,6 +10,8 @@ if "selected_images" not in st.session_state:
     st.session_state.selected_images = []
 if "cropping_stage" not in st.session_state:
     st.session_state.cropping_stage = False  # Controls if we move to the crop stage
+if "cropped_images" not in st.session_state:
+    st.session_state.cropped_images = {}
 
 # Upload Multiple Images
 uploaded_files = st.file_uploader("Upload multiple photos", type=["jpg", "jpeg", "png"], accept_multiple_files=True)
@@ -49,21 +51,34 @@ if st.session_state.cropping_stage:
 
         cropped_images[uploaded_file.name] = cropped_image
 
+    st.session_state.cropped_images = cropped_images
+
     # Step 3: Save & Download
     if st.button("OK - Save Cropped Images"):
         output_folder = "cropped_images"
         os.makedirs(output_folder, exist_ok=True)
 
-        for filename, cropped_img in cropped_images.items():
+        for filename, cropped_img in st.session_state.cropped_images.items():
             save_path = os.path.join(output_folder, f"{os.path.splitext(filename)[0]}_cropped.jpg")
             cropped_img.save(save_path)
 
             st.success(f"Saved: `{save_path}`")
 
-            with open(save_path, "rb") as file:
-                st.download_button(label=f"Download {filename}_cropped", data=file, file_name=os.path.basename(save_path))
+        # Provide a button to download all images as a zip file
+        if st.button("Download All Cropped Images"):
+            import zipfile
+            zip_path = os.path.join(output_folder, "cropped_images.zip")
+            with zipfile.ZipFile(zip_path, 'w') as zipf:
+                for filename in os.listdir(output_folder):
+                    if filename.endswith("_cropped.jpg"):
+                        zipf.write(os.path.join(output_folder, filename), filename)
+            
+            with open(zip_path, "rb") as file:
+                st.download_button(label="Download All Cropped Images", data=file, file_name="cropped_images.zip")
 
-        # Reset the app for a new selection
+    # Button to return to the beginning
+    if st.button("Start Over"):
         st.session_state.selected_images = []
         st.session_state.cropping_stage = False
+        st.session_state.cropped_images = {}
         st.experimental_rerun()
