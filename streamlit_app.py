@@ -11,7 +11,7 @@ if "selected_images" not in st.session_state:
 if "cropping_stage" not in st.session_state:
     st.session_state.cropping_stage = False  # Controls if we move to the crop stage
 
-# **Upload Multiple Images**
+# Upload Multiple Images
 uploaded_files = st.file_uploader("Upload multiple photos", type=["jpg", "jpeg", "png"], accept_multiple_files=True)
 
 if uploaded_files and not st.session_state.cropping_stage:
@@ -23,20 +23,20 @@ if uploaded_files and not st.session_state.cropping_stage:
     for i, uploaded_file in enumerate(uploaded_files):
         image = Image.open(uploaded_file)
         with cols[i % 3]:  # Distribute images in columns
-            st.image(image, caption=uploaded_file.name, use_container_width=True)  # **Larger Image Display**
+            st.image(image, caption=uploaded_file.name, use_container_width=True)  # Larger Image Display
             if st.checkbox(f"Select {uploaded_file.name}", key=uploaded_file.name):
                 selected_images.append(uploaded_file)
 
-    # **Confirm Selection**
+    # Confirm Selection
     if st.button("OK - Proceed to Cropping"):
         if len(selected_images) == 0 or len(selected_images) > 5:
             st.warning("Please select 1-5 images.")
         else:
             st.session_state.selected_images = selected_images
             st.session_state.cropping_stage = True
-            st.rerun()
+            st.experimental_rerun()
 
-# **Step 2: Cropping Interface**
+# Step 2: Cropping Interface
 if st.session_state.cropping_stage:
     st.subheader("Crop Selected Images")
     cropped_images = {}
@@ -45,11 +45,11 @@ if st.session_state.cropping_stage:
         image = Image.open(uploaded_file)
 
         st.write(f"**Crop {uploaded_file.name}**")
-        cropped_image = st_cropper(image, aspect_ratio=None)  # **Fixed incorrect function call**
+        cropped_image = st_cropper(image, aspect_ratio=None)  # Fixed incorrect function call
 
         cropped_images[uploaded_file.name] = cropped_image
 
-    # **Step 3: Save & Download**
+    # Step 3: Save & Download
     if st.button("OK - Save Cropped Images"):
         output_folder = "cropped_images"
         os.makedirs(output_folder, exist_ok=True)
@@ -66,4 +66,4 @@ if st.session_state.cropping_stage:
         # Reset the app for a new selection
         st.session_state.selected_images = []
         st.session_state.cropping_stage = False
-        st.rerun()
+        st.experimental_rerun()
