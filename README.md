@@ -3,7 +3,8 @@
 **App created by Mairi Young 2025**
 
 
+Seal_crop is an app to select, crop and edit photos for Saimaa Ringed Seal Photo ID Project
+It can be found at: sealcrop.streamlit.app/
 
-A simple app to select, crop and edit photos for Saimaa Ringed Seal Photo ID Project
 
-For instructions of use, visit the wiki 
+For instructions visit the wiki 
