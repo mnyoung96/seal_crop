@@ -1,19 +1,9 @@
-# 🎈 Blank app template
+# Seal ID Photo Selector & Cropper
 
-A simple Streamlit app template for you to modify!
+**App created by Mairi Young 2025**
 
-[![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://blank-app-template.streamlit.app/)
 
-### How to run it on your own machine
 
-1. Install the requirements
+A simple app to select, crop and edit photos for Saimaa Ringed Seal Photo ID Project
 
-   ```
-   $ pip install -r requirements.txt
-   ```
-
-2. Run the app
-
-   ```
-   $ streamlit run streamlit_app.py
-   ```
+For instructions of use, visit the wiki 
