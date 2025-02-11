@@ -2,6 +2,27 @@ import streamlit as st
 import os
 from PIL import Image
 from streamlit_cropper import st_cropper
+import cv2
+import numpy as np
+from PIL import ImageEnhance
+
+# Define image enhancement functions
+def adjust_brightness_contrast(image, alpha, beta):
+    return cv2.addWeighted(image, alpha, image, 0, beta)
+
+def sharpen_image(image):
+    kernel = np.array([[-1, -1, -1],
+                       [-1, 9, -1],
+                       [-1, -1, -1]])
+    return cv2.filter2D(image, -1, kernel)
+
+def adjust_brightness(image, factor):
+    enhancer = ImageEnhance.Brightness(image)
+    return enhancer.enhance(factor)
+
+def adjust_contrast(image, factor):
+    enhancer = ImageEnhance.Contrast(image)
+    return enhancer.enhance(factor)
 
 # Step 1: Image Selection
 st.title("Seal ID Photo Selector & Cropper")
@@ -48,7 +69,26 @@ if st.session_state.cropping_stage:
         st.write(f"**Crop {uploaded_file.name}**")
         cropped_image = st_cropper(image, aspect_ratio=None)  # Fixed incorrect function call
 
-        cropped_images[uploaded_file.name] = cropped_image
+        # Convert PIL image to OpenCV format
+        cropped_image_cv = cv2.cvtColor(np.array(cropped_image), cv2.COLOR_RGB2BGR)
+
+        # Image Editing Options
+        st.write("### Enhance Image")
+        brightness = st.slider("Brightness", 0.5, 2.0, 1.0, key=f"brightness_{uploaded_file.name}")
+        contrast = st.slider("Contrast", 0.5, 2.0, 1.0, key=f"contrast_{uploaded_file.name}")
+        sharpen = st.checkbox("Sharpen", key=f"sharpen_{uploaded_file.name}")
+
+        # Apply Enhancements
+        enhanced_image_cv = adjust_brightness_contrast(cropped_image_cv, contrast, brightness)
+        if sharpen:
+            enhanced_image_cv = sharpen_image(enhanced_image_cv)
+
+        # Convert back to PIL format
+        enhanced_image = Image.fromarray(cv2.cvtColor(enhanced_image_cv, cv2.COLOR_BGR2RGB))
+
+        cropped_images[uploaded_file.name] = enhanced_image
+
+        st.image(enhanced_image, caption=f"Enhanced {uploaded_file.name}")
 
     st.session_state.cropped_images = cropped_images
 
